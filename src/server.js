@@ -1,16 +1,14 @@
 const express = require('express');
-const { getGeolocationDataFromDb } = require('./db');
+const { getGeolocationDataFromDb } = require('./db');  
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
-const cors = require('cors');  // Se estiver usando CORS
+const cors = require('cors');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
-// Configurar CORS
-app.use(cors());
+app.use(cors());  
 
-// Configurações do Swagger
 const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
@@ -19,12 +17,22 @@ const swaggerOptions = {
       version: '1.0.0',
       description: 'API para buscar e armazenar dados de geolocalização',
     },
+    servers: [
+      {
+        url: `http://localhost:${port}`,  
+      },
+    ],
   },
-  apis: ['./src/server.js'], // Caminho para os comentários das rotas
+  apis: [__filename], 
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+// Rota para a página inicial
+app.get('/', (req, res) => {
+  res.send('Bem-vindo à API de Geolocalização! Acesse /api/geolocation para os dados ou /api-docs para a documentação.');
+});
 
 // Rota para obter os dados de geolocalização do banco
 /**
@@ -32,9 +40,10 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  * /api/geolocation:
  *   get:
  *     summary: Retorna os dados de geolocalização
+ *     description: Retorna uma lista de dados de geolocalização armazenados no banco de dados.
  *     responses:
  *       200:
- *         description: Lista de geolocalizações
+ *         description: Lista de geolocalizações.
  *         content:
  *           application/json:
  *             schema:
@@ -54,14 +63,13 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  */
 app.get('/api/geolocation', async (req, res) => {
   try {
-    const data = await getGeolocationDataFromDb();
+    const data = await getGeolocationDataFromDb(); 
     res.json(data);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao buscar dados' });
   }
 });
 
-// Iniciar o servidor
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);
   console.log(`Documentação Swagger disponível em http://localhost:${port}/api-docs`);

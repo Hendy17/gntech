@@ -20,3 +20,8 @@ yarn.lock
 # Ignorar arquivos de cache e temporários
 .DS_Store
 *.log
+
+# Ignorar arquivos do Docker
+docker-compose.override.yml  # Arquivos específicos da máquina de desenvolvimento
+.dockerignore                # Docker ignore file
+docker-compose.yml           # Se você não quiser subir o docker-compose (opcional)
